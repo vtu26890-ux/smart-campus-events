@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #333; }
+        nav { background: #1a237e; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        nav a { color: white; text-decoration: none; margin-left: 1rem; }
+        .container { max-width: 1100px; margin: 2rem auto; padding: 0 1rem; }
+        h1 { color: #1a237e; margin-bottom: 1.5rem; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 2rem; }
+        .stat-card { background: white; border-radius: 8px; padding: 1.5rem; box-shadow: 0 2px 8px rgba(0,0,0,.1); text-align: center; }
+        .stat-card .num { font-size: 2.5rem; font-weight: bold; color: #1a237e; }
+        .stat-card .label { color: #666; font-size: 0.9rem; margin-top: 0.5rem; }
+        .btn { display: inline-block; padding: 0.6rem 1.2rem; border-radius: 4px; text-decoration: none; font-weight: bold; }
+        .btn-primary { background: #ff6f00; color: white; }
+        .btn-primary:hover { background: #e65100; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.1); margin-top: 1rem; }
+        th { background: #1a237e; color: white; padding: 0.75rem 1rem; text-align: left; }
+        td { padding: 0.75rem 1rem; border-bottom: 1px solid #e0e0e0; }
+        tr:last-child td { border-bottom: none; }
+        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; }
+        .section-header h2 { color: #1a237e; }
+    </style>
+</head>
+<body>
+<nav>
+    <strong>🎓 CampusEvents Admin</strong>
+    <div>
+        <a th:href="@{/admin/events}">Manage Events</a>
+        <a th:href="@{/}">Student View</a>
+        <a th:href="@{/logout}">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h1>📊 Admin Dashboard</h1>
+
+    <div th:if="${success}" style="background:#e8f5e9;border:1px solid #a5d6a7;padding:.75rem;border-radius:4px;margin-bottom:1rem;color:#2e7d32;"
+         th:text="${success}"></div>
+
+    <!-- Stat cards -->
+    <div class="stats">
+        <div class="stat-card">
+            <div class="num" th:text="${totalEvents}">0</div>
+            <div class="label">Total Events</div>
+        </div>
+        <div class="stat-card">
+            <div class="num" th:text="${totalRegistrations}">0</div>
+            <div class="label">Total Registrations</div>
+        </div>
+    </div>
+
+    <!-- Recent events -->
+    <div class="section-header">
+        <h2>Recent Events</h2>
+        <a th:href="@{/admin/events/add}" class="btn btn-primary">+ Add Event</a>
+    </div>
+    <table>
+        <thead>
+        <tr>
+            <th>Title</th>
+            <th>Date</th>
+            <th>Type</th>
+            <th>Dept</th>
+            <th>Registrations</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="event : ${recentEvents}">
+            <td th:text="${event.title}"></td>
+            <td th:text="${event.eventDate}"></td>
+            <td th:text="${event.eventType}"></td>
+            <td th:text="${event.department}"></td>
+            <td th:text="${event.registeredCount + '/' + event.capacity}"></td>
+            <td>
+                <a th:href="@{/admin/events/edit/{id}(id=${event.id})}" class="btn" style="background:#1565c0;color:white;font-size:.8rem;">Edit</a>
+                &nbsp;
+                <a th:href="@{/admin/events/{id}/registrations(id=${event.id})}" class="btn" style="background:#388e3c;color:white;font-size:.8rem;">Registrations</a>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+
+    <br/>
+    <!-- Registrations by type -->
+    <h2 style="color:#1a237e;margin-bottom:1rem;">📈 Registrations by Event Type</h2>
+    <table>
+        <thead><tr><th>Event Type</th><th>Registration Count</th></tr></thead>
+        <tbody>
+        <tr th:each="row : ${statsByType}">
+            <td th:text="${row[0]}"></td>
+            <td th:text="${row[1]}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <br/>
+    <!-- Average ratings -->
+    <h2 style="color:#1a237e;margin-bottom:1rem;">⭐ Average Feedback Ratings</h2>
+    <table>
+        <thead><tr><th>Event</th><th>Avg Rating (out of 5)</th></tr></thead>
+        <tbody>
+        <tr th:each="row : ${avgRatings}">
+            <td th:text="${row[0]}"></td>
+            <td th:text="${#numbers.formatDecimal(row[1], 1, 2)}"></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(avgRatings)}">
+            <td colspan="2" style="color:#999;">No feedback yet.</td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

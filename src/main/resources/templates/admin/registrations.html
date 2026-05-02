@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Registrations</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #333; }
+        nav { background: #1a237e; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
+        nav a { color: white; text-decoration: none; margin-left: 1rem; }
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
+        h1 { color: #1a237e; margin-bottom: 0.5rem; }
+        .event-info { background: #e3f2fd; padding: 1rem 1.5rem; border-radius: 8px; margin-bottom: 1.5rem; }
+        .event-info h2 { color: #1565c0; margin-bottom: 0.3rem; }
+        .event-info p { color: #555; font-size: 0.9rem; }
+        .stat { display: inline-block; background: #1a237e; color: white; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.85rem; margin-left: 1rem; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+        th { background: #1a237e; color: white; padding: 0.75rem 1rem; text-align: left; font-size: 0.9rem; }
+        td { padding: 0.7rem 1rem; border-bottom: 1px solid #e0e0e0; font-size: 0.9rem; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f5f5f5; }
+        .stars { color: #ff8f00; }
+        .btn { display: inline-block; padding: 0.5rem 1rem; border-radius: 4px; text-decoration: none; font-weight: bold; font-size: 0.85rem; background: #607d8b; color: white; }
+    </style>
+</head>
+<body>
+<nav>
+    <strong>🎓 CampusEvents Admin</strong>
+    <div>
+        <a th:href="@{/admin/dashboard}">Dashboard</a>
+        <a th:href="@{/admin/events}">Events</a>
+        <a th:href="@{/logout}">Logout</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h1>📋 Registrations <span class="stat" th:text="${count + ' registered'}"></span></h1>
+
+    <div class="event-info">
+        <h2 th:text="${event.title}">Event</h2>
+        <p>
+            📅 <span th:text="${event.eventDate}"></span> &nbsp;
+            📍 <span th:text="${event.venue}"></span> &nbsp;
+            🏢 <span th:text="${event.department}"></span> &nbsp;
+            🎯 <span th:text="${event.eventType}"></span>
+        </p>
+        <p style="margin-top:.5rem;">
+            Capacity: <strong th:text="${event.registeredCount + '/' + event.capacity}"></strong>
+        </p>
+    </div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>#</th>
+            <th>Student Name</th>
+            <th>Email</th>
+            <th>Roll No</th>
+            <th>Department</th>
+            <th>Registered On</th>
+            <th>Rating</th>
+            <th>Feedback</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="reg, stat : ${registrations}">
+            <td th:text="${stat.count}"></td>
+            <td th:text="${reg.studentName}"></td>
+            <td th:text="${reg.email}"></td>
+            <td th:text="${reg.rollNumber}"></td>
+            <td th:text="${reg.department}"></td>
+            <td th:text="${#temporals.format(reg.registeredAt, 'dd MMM yyyy HH:mm')}"></td>
+            <td>
+                <span class="stars" th:if="${reg.rating != null}">
+                    <span th:each="i : ${#numbers.sequence(1, reg.rating)}">★</span>
+                </span>
+                <span th:if="${reg.rating == null}" style="color:#bbb;">—</span>
+            </td>
+            <td th:text="${reg.feedbackComment != null ? reg.feedbackComment : '—'}"></td>
+        </tr>
+        <tr th:if="${#lists.isEmpty(registrations)}">
+            <td colspan="8" style="text-align:center;color:#999;padding:2rem;">No registrations yet.</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <br/>
+    <a th:href="@{/admin/events}" class="btn">← Back to Events</a>
+</div>
+</body>
+</html>

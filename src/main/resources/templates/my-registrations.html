@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>My Registrations</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #333; }
+        nav { background: #1a237e; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; }
+        nav a { color: white; text-decoration: none; margin-left: 1rem; }
+        .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        h1 { color: #1a237e; margin-bottom: 1.5rem; }
+        .search-box { display: flex; gap: 1rem; margin-bottom: 2rem; }
+        .search-box input { flex: 1; padding: 0.6rem 1rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
+        .btn { padding: 0.6rem 1.2rem; background: #1a237e; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+        th { background: #1a237e; color: white; padding: 0.75rem 1rem; text-align: left; }
+        td { padding: 0.75rem 1rem; border-bottom: 1px solid #e0e0e0; }
+        tr:last-child td { border-bottom: none; }
+        tr:hover td { background: #f5f5f5; }
+        .badge { padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; background: #e3f2fd; color: #1565c0; }
+    </style>
+</head>
+<body>
+<nav>
+    <a th:href="@{/}" style="color:white;text-decoration:none;font-weight:bold">🎓 CampusEvents</a>
+    <div>
+        <a th:href="@{/events}">Browse Events</a>
+        <a th:href="@{/my-registrations}">My Registrations</a>
+    </div>
+</nav>
+
+<div class="container">
+    <h1>My Registrations</h1>
+
+    <form th:action="@{/my-registrations}" method="get" class="search-box">
+        <input type="email" name="email" th:value="${email}" placeholder="Enter your registered email..." required/>
+        <button type="submit" class="btn">🔍 Search</button>
+    </form>
+
+    <div th:if="${registrations != null}">
+        <div th:if="${#lists.isEmpty(registrations)}" style="color:#666;">
+            No registrations found for <strong th:text="${email}"></strong>.
+        </div>
+        <table th:if="${!#lists.isEmpty(registrations)}">
+            <thead>
+            <tr>
+                <th>#</th>
+                <th>Event</th>
+                <th>Date</th>
+                <th>Venue</th>
+                <th>Type</th>
+                <th>Registered On</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="reg, stat : ${registrations}">
+                <td th:text="${stat.count}"></td>
+                <td th:text="${reg.event.title}">Title</td>
+                <td th:text="${reg.event.eventDate}">Date</td>
+                <td th:text="${reg.event.venue}">Venue</td>
+                <td><span class="badge" th:text="${reg.event.eventType}">Type</span></td>
+                <td th:text="${#temporals.format(reg.registeredAt, 'dd MMM yyyy')}">Date</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>
