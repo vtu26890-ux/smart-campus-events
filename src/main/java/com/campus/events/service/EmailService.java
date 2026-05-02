@@ -108,7 +108,6 @@ public class EmailService {
                          style="background:#ffffff;border-radius:12px;overflow:hidden;
                                 box-shadow:0 4px 24px rgba(0,0,0,0.08);max-width:580px;width:100%%;">
 
-                    <!-- Header -->
                     <tr>
                       <td style="background:linear-gradient(135deg,#1a73e8,#0d47a1);
                                  padding:36px 40px;text-align:center;">
@@ -122,7 +121,6 @@ public class EmailService {
                       </td>
                     </tr>
 
-                    <!-- Body -->
                     <tr>
                       <td style="padding:36px 40px;">
                         <p style="color:#374151;font-size:16px;margin:0 0 24px;">
@@ -138,69 +136,48 @@ public class EmailService {
                               <h2 style="color:#1a73e8;margin:0 0 20px;font-size:20px;">%s</h2>
                               <table cellpadding="0" cellspacing="0">
                                 <tr>
-                                  <td style="padding:5px 16px 5px 0;color:#6b7280;font-size:13px;
-                                             font-weight:600;white-space:nowrap;">📅 Date</td>
-                                  <td style="padding:5px 0;color:#111827;font-size:14px;
-                                             font-weight:600;">%s</td>
+                                  <td style="padding:5px 16px 5px 0;color:#6b7280;font-size:13px;font-weight:600;white-space:nowrap;">📅 Date</td>
+                                  <td style="padding:5px 0;color:#111827;font-size:14px;font-weight:600;">%s</td>
                                 </tr>
                                 <tr>
-                                  <td style="padding:5px 16px 5px 0;color:#6b7280;font-size:13px;
-                                             font-weight:600;">🕐 Time</td>
-                                  <td style="padding:5px 0;color:#111827;font-size:14px;
-                                             font-weight:600;">%s</td>
+                                  <td style="padding:5px 16px 5px 0;color:#6b7280;font-size:13px;font-weight:600;">🕐 Time</td>
+                                  <td style="padding:5px 0;color:#111827;font-size:14px;font-weight:600;">%s</td>
                                 </tr>
                                 <tr>
-                                  <td style="padding:5px 16px 5px 0;color:#6b7280;font-size:13px;
-                                             font-weight:600;">📍 Venue</td>
-                                  <td style="padding:5px 0;color:#111827;font-size:14px;
-                                             font-weight:600;">%s</td>
+                                  <td style="padding:5px 16px 5px 0;color:#6b7280;font-size:13px;font-weight:600;">📍 Venue</td>
+                                  <td style="padding:5px 0;color:#111827;font-size:14px;font-weight:600;">%s</td>
                                 </tr>
                                 <tr>
-                                  <td style="padding:5px 16px 5px 0;color:#6b7280;font-size:13px;
-                                             font-weight:600;">🏫 Type</td>
-                                  <td style="padding:5px 0;color:#111827;font-size:14px;
-                                             font-weight:600;">%s</td>
+                                  <td style="padding:5px 16px 5px 0;color:#6b7280;font-size:13px;font-weight:600;">🏫 Type</td>
+                                  <td style="padding:5px 0;color:#111827;font-size:14px;font-weight:600;">%s</td>
                                 </tr>
                               </table>
                             </td>
                           </tr>
                         </table>
 
-                        <h3 style="color:#374151;font-size:15px;margin:0 0 12px;
-                                   font-weight:700;text-transform:uppercase;">
+                        <h3 style="color:#374151;font-size:15px;margin:0 0 12px;font-weight:700;text-transform:uppercase;">
                           Your Registration Details
                         </h3>
                         <table width="100%%" cellpadding="0" cellspacing="0"
                                style="border:1px solid #e5e7eb;border-radius:8px;margin-bottom:28px;">
                           <tr style="background:#f9fafb;">
-                            <td style="padding:10px 16px;color:#6b7280;font-size:13px;
-                                       font-weight:600;border-bottom:1px solid #e5e7eb;width:40%%;">
-                              Name
-                            </td>
-                            <td style="padding:10px 16px;color:#111827;font-size:13px;
-                                       border-bottom:1px solid #e5e7eb;">%s</td>
+                            <td style="padding:10px 16px;color:#6b7280;font-size:13px;font-weight:600;border-bottom:1px solid #e5e7eb;width:40%%;">Name</td>
+                            <td style="padding:10px 16px;color:#111827;font-size:13px;border-bottom:1px solid #e5e7eb;">%s</td>
                           </tr>
                           <tr>
-                            <td style="padding:10px 16px;color:#6b7280;font-size:13px;
-                                       font-weight:600;border-bottom:1px solid #e5e7eb;">
-                              Roll Number
-                            </td>
-                            <td style="padding:10px 16px;color:#111827;font-size:13px;
-                                       border-bottom:1px solid #e5e7eb;">%s</td>
+                            <td style="padding:10px 16px;color:#6b7280;font-size:13px;font-weight:600;border-bottom:1px solid #e5e7eb;">Roll Number</td>
+                            <td style="padding:10px 16px;color:#111827;font-size:13px;border-bottom:1px solid #e5e7eb;">%s</td>
                           </tr>
                           <tr style="background:#f9fafb;">
-                            <td style="padding:10px 16px;color:#6b7280;font-size:13px;font-weight:600;">
-                              Department
-                            </td>
+                            <td style="padding:10px 16px;color:#6b7280;font-size:13px;font-weight:600;">Department</td>
                             <td style="padding:10px 16px;color:#111827;font-size:13px;">%s</td>
                           </tr>
                         </table>
 
-                        <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;
-                                    padding:16px 20px;margin-bottom:28px;">
+                        <div style="background:#fef3c7;border:1px solid #fcd34d;border-radius:8px;padding:16px 20px;margin-bottom:28px;">
                           <p style="margin:0;color:#92400e;font-size:13px;line-height:1.6;">
-                            <strong>📌 Important:</strong> Please carry this email or your roll number
-                            on the day of the event for verification.
+                            <strong>📌 Important:</strong> Please carry this email or your roll number on the day of the event for verification.
                           </p>
                         </div>
 
@@ -211,10 +188,8 @@ public class EmailService {
                       </td>
                     </tr>
 
-                    <!-- Footer -->
                     <tr>
-                      <td style="background:#f9fafb;border-top:1px solid #e5e7eb;
-                                 padding:20px 40px;text-align:center;">
+                      <td style="background:#f9fafb;border-top:1px solid #e5e7eb;padding:20px 40px;text-align:center;">
                         <p style="color:#9ca3af;font-size:12px;margin:0;line-height:1.6;">
                           This is an automated confirmation from %s.<br/>
                           Please do not reply to this email.
