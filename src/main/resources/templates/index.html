@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Smart Campus Events</title>
@@ -7,11 +8,18 @@
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #333; }
         nav { background: #1a237e; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; align-items: center; }
-        nav a { color: white; text-decoration: none; margin-left: 1rem; }
+        nav a { color: white; text-decoration: none; margin-left: 1rem; font-size: 0.9rem; }
         nav a:hover { text-decoration: underline; }
+        .nav-right { display: flex; align-items: center; gap: 0.5rem; }
+        .user-info { color: #90caf9; font-size: 0.85rem; margin-right: 0.5rem; }
+        .logout-btn { background: #ef5350; color: white; border: none; padding: 0.4rem 0.9rem;
+                      border-radius: 4px; cursor: pointer; font-size: 0.85rem; font-weight: bold; }
+        .logout-btn:hover { background: #c62828; }
+        .login-btn { background: #ff6f00; color: white; padding: 0.4rem 0.9rem;
+                     border-radius: 4px; font-size: 0.85rem; font-weight: bold; text-decoration: none; }
         .hero { background: linear-gradient(135deg, #1a237e, #283593); color: white; text-align: center; padding: 4rem 2rem; }
         .hero h1 { font-size: 2.5rem; margin-bottom: 1rem; }
-        .hero p { font-size: 1.2rem; margin-bottom: 2rem; }
+        .hero p { font-size: 1.2rem; margin-bottom: 2rem; opacity: 0.9; }
         .btn { display: inline-block; padding: 0.75rem 1.5rem; border-radius: 4px; text-decoration: none; font-weight: bold; }
         .btn-primary { background: #ff6f00; color: white; }
         .btn-primary:hover { background: #e65100; }
@@ -23,17 +31,33 @@
         .badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; background: #e3f2fd; color: #1565c0; margin-bottom: 0.5rem; }
         .card p { font-size: 0.9rem; color: #666; margin-bottom: 1rem; }
         footer { background: #1a237e; color: #ccc; text-align: center; padding: 1.5rem; margin-top: 3rem; }
+        .welcome-bar { background: #e8f5e9; border-bottom: 1px solid #a5d6a7; padding: 0.6rem 2rem; font-size: 0.9rem; color: #2e7d32; }
     </style>
 </head>
 <body>
 <nav>
     <strong>🎓 CampusEvents</strong>
-    <div>
+    <div class="nav-right">
         <a th:href="@{/events}">Browse Events</a>
         <a th:href="@{/my-registrations}">My Registrations</a>
-        <a th:href="@{/admin/dashboard}">Admin</a>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/dashboard}">Admin</a>
+
+        <span sec:authorize="isAuthenticated()">
+            <span class="user-info" sec:authentication="name">User</span>
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </span>
+
+        <a sec:authorize="!isAuthenticated()" th:href="@{/login}" class="login-btn">Login</a>
     </div>
 </nav>
+
+<!-- Welcome bar shown when logged in -->
+<div class="welcome-bar" sec:authorize="isAuthenticated()">
+    👋 Welcome! You're signed in with <strong sec:authentication="name"></strong>.
+    You can now register for events.
+</div>
 
 <div class="hero">
     <h1>Smart Campus Event Management</h1>
@@ -50,7 +74,7 @@
             <p th:text="${event.description != null ? #strings.abbreviate(event.description, 80) : ''}">Desc</p>
             <p>📅 <span th:text="${event.eventDate}">Date</span> &nbsp; 📍 <span th:text="${event.venue}">Venue</span></p>
             <br/>
-            <a th:href="@{/register/{id}(id=${event.id})}" class="btn btn-primary" style="font-size:.85rem">Register</a>
+            <a th:href="@{/events}" class="btn btn-primary" style="font-size:.85rem;">View All Events</a>
         </div>
         <div th:if="${#lists.isEmpty(upcomingEvents)}">
             <p>No upcoming events. Check back later!</p>
@@ -61,7 +85,7 @@
 </div>
 
 <footer>
-    &copy; 2024 Smart Campus Event Management System
+    &copy; 2024 Smart Campus Event Management System — Vel Tech University
 </footer>
 </body>
 </html>
