@@ -96,7 +96,14 @@ public class StudentController {
                                      @Valid @ModelAttribute("registration") Registration registration,
                                      BindingResult result,
                                      Model model,
+                                     HttpSession session,
+                                     @AuthenticationPrincipal OAuth2User principal,
                                      RedirectAttributes redirectAttributes) {
+        // Security: must be logged in via Google OAuth2 to register
+        if (principal == null) {
+            return "redirect:/login";
+        }
+
         Event event = eventService.getEventById(eventId)
             .orElseThrow(() -> new RuntimeException("Event not found"));
 

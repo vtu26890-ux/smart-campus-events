@@ -21,13 +21,12 @@ public class SecurityConfig {
         http
             .authorizeHttpRequests(auth -> auth
                 // Public pages — anyone can view
-                .requestMatchers("/", "/events", "/events/**",
-                                 "/my-registrations", "/api/**",
+                .requestMatchers("/", "/events", "/api/**",
                                  "/login", "/css/**", "/js/**").permitAll()
                 // Admin pages — only admin role
                 .requestMatchers("/admin/**").hasRole("ADMIN")
-                // Registration requires login (Google or admin)
-                .requestMatchers("/register/**", "/oauth2/**").authenticated()
+                // Students must log in via Google to register or view their registrations
+                .requestMatchers("/register/**", "/my-registrations", "/oauth2/**").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
