@@ -10,7 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 import java.time.format.DateTimeFormatter;
@@ -29,33 +28,35 @@ public class EmailService {
     @Value("${app.name:Smart Campus Events}")
     private String appName;
 
-    @Async
+    // NOTE: @Async removed — running synchronously so errors appear in logs
     public void sendRegistrationConfirmation(Registration registration) {
-        log.info("📧 Attempting to send email to: {}", registration.getEmail());
-        log.info("📧 From email configured as: {}", fromEmail);
+        log.info("=== EMAIL ATTEMPT START ===");
+        log.info("To: {}", registration.getEmail());
+        log.info("From: {}", fromEmail);
 
         if (fromEmail == null || fromEmail.isBlank()) {
-            log.warn("❌ MAIL_USERNAME not configured — skipping email");
+            log.error("=== EMAIL SKIPPED: MAIL_USERNAME is empty ===");
             return;
         }
 
         try {
+            log.info("Creating MIME message...");
             MimeMessage message = mailSender.createMimeMessage();
             MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
             helper.setFrom(fromEmail);
             helper.setTo(registration.getEmail());
-            helper.setSubject("✅ Registration Confirmed — " + registration.getEvent().getTitle());
+            helper.setSubject("Registration Confirmed - " + registration.getEvent().getTitle());
             helper.setText(buildHtml(registration), true);
 
-            log.info("📧 Sending email via SMTP...");
+            log.info("Calling mailSender.send()...");
             mailSender.send(message);
-            log.info("✅ Email successfully sent to {}", registration.getEmail());
+            log.info("=== EMAIL SENT SUCCESSFULLY to {} ===", registration.getEmail());
 
         } catch (MessagingException e) {
-            log.error("❌ MessagingException sending email to {}: {}", registration.getEmail(), e.getMessage(), e);
+            log.error("=== EMAIL FAILED - MessagingException: {} ===", e.getMessage(), e);
         } catch (Exception e) {
-            log.error("❌ Unexpected error sending email to {}: {}", registration.getEmail(), e.getMessage(), e);
+            log.error("=== EMAIL FAILED - Exception: {} ===", e.getMessage(), e);
         }
     }
 
