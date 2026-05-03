@@ -31,6 +31,10 @@ public class SecurityConfig {
                 .defaultSuccessUrl("/admin/dashboard", true)
                 .permitAll()
             )
+            .oauth2Login(oauth -> oauth
+                .loginPage("/login")
+                .defaultSuccessUrl("/oauth2/success", true)
+            )
             .logout(logout -> logout
                 .logoutSuccessUrl("/")
                 .permitAll()
@@ -39,7 +43,7 @@ public class SecurityConfig {
                 .ignoringRequestMatchers("/h2-console/**")
             )
             .headers(headers -> headers
-                .frameOptions(frame -> frame.sameOrigin()) // needed for H2 console
+                .frameOptions(frame -> frame.sameOrigin())
             );
 
         return http.build();
