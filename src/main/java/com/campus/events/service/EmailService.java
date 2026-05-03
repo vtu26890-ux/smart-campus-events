@@ -31,8 +31,11 @@ public class EmailService {
 
     @Async
     public void sendRegistrationConfirmation(Registration registration) {
+        log.info("📧 Attempting to send email to: {}", registration.getEmail());
+        log.info("📧 From email configured as: {}", fromEmail);
+
         if (fromEmail == null || fromEmail.isBlank()) {
-            log.warn("MAIL_USERNAME not configured — skipping email");
+            log.warn("❌ MAIL_USERNAME not configured — skipping email");
             return;
         }
 
@@ -45,11 +48,14 @@ public class EmailService {
             helper.setSubject("✅ Registration Confirmed — " + registration.getEvent().getTitle());
             helper.setText(buildHtml(registration), true);
 
+            log.info("📧 Sending email via SMTP...");
             mailSender.send(message);
-            log.info("✅ Email sent to {}", registration.getEmail());
+            log.info("✅ Email successfully sent to {}", registration.getEmail());
 
         } catch (MessagingException e) {
-            log.error("❌ Failed to send email to {}: {}", registration.getEmail(), e.getMessage());
+            log.error("❌ MessagingException sending email to {}: {}", registration.getEmail(), e.getMessage(), e);
+        } catch (Exception e) {
+            log.error("❌ Unexpected error sending email to {}: {}", registration.getEmail(), e.getMessage(), e);
         }
     }
 
