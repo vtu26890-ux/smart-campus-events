@@ -4,8 +4,11 @@ import com.campus.events.model.Event;
 import com.campus.events.model.Registration;
 import com.campus.events.service.EventService;
 import com.campus.events.service.RegistrationService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -45,12 +48,46 @@ public class StudentController {
         return "event-detail";
     }
 
+    // OAuth2 success — save Gmail to session
+    @GetMapping("/oauth2/success")
+    public String oauth2Success(@AuthenticationPrincipal OAuth2User principal,
+                                HttpSession session) {
+        if (principal != null) {
+            session.setAttribute("oauth2Email", principal.getAttribute("email"));
+            session.setAttribute("oauth2Name",  principal.getAttribute("name"));
+        }
+        return "redirect:/events";
+    }
+
+    // Registration — only accessible when logged in (enforced by SecurityConfig)
     @GetMapping("/register/{eventId}")
-    public String showRegisterForm(@PathVariable Long eventId, Model model) {
+    public String showRegisterForm(@PathVariable Long eventId,
+                                   Model model,
+                                   HttpSession session,
+                                   @AuthenticationPrincipal OAuth2User principal) {
         Event event = eventService.getEventById(eventId)
             .orElseThrow(() -> new RuntimeException("Event not found"));
+
+        Registration registration = new Registration();
+
+        // Pre-fill from Google session
+        String email = (String) session.getAttribute("oauth2Email");
+        String name  = (String) session.getAttribute("oauth2Name");
+
+        // Also try directly from principal if session not set yet
+        if (email == null && principal != null) {
+            email = principal.getAttribute("email");
+            name  = principal.getAttribute("name");
+            session.setAttribute("oauth2Email", email);
+            session.setAttribute("oauth2Name",  name);
+        }
+
+        if (email != null) registration.setEmail(email);
+        if (name  != null) registration.setStudentName(name);
+
         model.addAttribute("event", event);
-        model.addAttribute("registration", new Registration());
+        model.addAttribute("registration", registration);
+        model.addAttribute("googleEmail", email);
         return "register-event";
     }
 
@@ -72,7 +109,8 @@ public class StudentController {
         try {
             registrationService.register(registration);
             redirectAttributes.addFlashAttribute("success",
-                "Successfully registered for: " + event.getTitle());
+                "🎉 Successfully registered for: " + event.getTitle() +
+                ". Check your email for confirmation!");
         } catch (IllegalStateException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
         }
@@ -81,7 +119,13 @@ public class StudentController {
     }
 
     @GetMapping("/my-registrations")
-    public String myRegistrations(@RequestParam(required = false) String email, Model model) {
+    public String myRegistrations(@RequestParam(required = false) String email,
+                                  Model model,
+                                  HttpSession session) {
+        // Auto-fill email from Google session
+        if (email == null || email.isBlank()) {
+            email = (String) session.getAttribute("oauth2Email");
+        }
         if (email != null && !email.isBlank()) {
             List<Registration> regs = registrationService.getRegistrationsByEmail(email);
             model.addAttribute("registrations", regs);

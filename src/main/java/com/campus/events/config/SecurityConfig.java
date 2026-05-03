@@ -20,16 +20,24 @@ public class SecurityConfig {
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/events", "/events/**", "/register/**",
+                // Public pages — anyone can view
+                .requestMatchers("/", "/events", "/events/**",
                                  "/my-registrations", "/api/**",
-                                 "/css/**", "/js/**").permitAll()
+                                 "/login", "/css/**", "/js/**").permitAll()
+                // Admin pages — only admin role
                 .requestMatchers("/admin/**").hasRole("ADMIN")
+                // Registration requires login (Google or admin)
+                .requestMatchers("/register/**", "/oauth2/**").authenticated()
                 .anyRequest().authenticated()
             )
             .formLogin(form -> form
                 .loginPage("/login")
                 .defaultSuccessUrl("/admin/dashboard", true)
                 .permitAll()
+            )
+            .oauth2Login(oauth -> oauth
+                .loginPage("/login")
+                .defaultSuccessUrl("/oauth2/success", true)
             )
             .logout(logout -> logout
                 .logoutUrl("/logout")

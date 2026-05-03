@@ -8,78 +8,93 @@
         body { font-family: 'Segoe UI', sans-serif; background: #1a237e;
                display: flex; align-items: center; justify-content: center; min-height: 100vh; }
         .card { background: white; padding: 2.5rem; border-radius: 12px;
-                width: 380px; box-shadow: 0 8px 32px rgba(0,0,0,.3); }
+                width: 400px; box-shadow: 0 8px 32px rgba(0,0,0,.3); }
         h1 { color: #1a237e; margin-bottom: 0.3rem; font-size: 1.5rem; }
         .subtitle { color: #666; margin-bottom: 1.5rem; font-size: 0.9rem; }
-        .student-note { background: #e8f5e9; border: 1px solid #a5d6a7;
-                        border-radius: 8px; padding: 1rem; margin-bottom: 1.2rem;
-                        font-size: 0.85rem; color: #2e7d32; text-align: center; }
+
+        .student-box { background: #e3f2fd; border: 1.5px solid #90caf9;
+                       border-radius: 10px; padding: 1.2rem; margin-bottom: 1.5rem; }
+        .student-box h3 { color: #1565c0; margin-bottom: 0.5rem; font-size: 1rem; }
+        .student-box p { color: #1976d2; font-size: 0.85rem; margin-bottom: 1rem; }
+
         .google-btn {
             display: flex; align-items: center; justify-content: center; gap: 12px;
-            width: 100%; padding: 0.75rem; border: 2px solid #dadce0;
+            width: 100%; padding: 0.8rem; border: 2px solid #dadce0;
             border-radius: 8px; background: white; cursor: pointer;
             font-size: 0.95rem; font-weight: 600; color: #3c4043;
-            text-decoration: none; transition: box-shadow 0.2s; margin-bottom: 1.5rem;
+            text-decoration: none; transition: box-shadow 0.2s, border-color 0.2s;
         }
-        .google-btn:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.15); border-color: #aaa; }
+        .google-btn:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.15); border-color: #4285f4; }
         .google-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
-        .divider { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem; }
+
+        .divider { display: flex; align-items: center; gap: 1rem; margin: 1.5rem 0; }
         .divider::before, .divider::after { content: ''; flex: 1; height: 1px; background: #e0e0e0; }
         .divider span { color: #999; font-size: 0.8rem; white-space: nowrap; }
-        .form-group { margin-bottom: 1rem; }
-        label { display: block; font-weight: 600; margin-bottom: 0.3rem; color: #444; font-size: 0.9rem; }
+
+        .admin-box { background: #fafafa; border: 1px solid #e0e0e0;
+                     border-radius: 10px; padding: 1.2rem; }
+        .admin-box h3 { color: #555; margin-bottom: 1rem; font-size: 0.9rem;
+                        text-transform: uppercase; letter-spacing: 0.5px; }
+
+        .form-group { margin-bottom: 0.9rem; }
+        label { display: block; font-weight: 600; margin-bottom: 0.3rem;
+                color: #444; font-size: 0.85rem; }
         input { width: 100%; padding: 0.6rem 0.8rem; border: 1px solid #ccc;
-                border-radius: 6px; font-size: 0.95rem; }
+                border-radius: 6px; font-size: 0.9rem; }
         input:focus { outline: none; border-color: #1a237e; }
-        .btn { width: 100%; padding: 0.75rem; background: #1a237e; color: white;
-               border: none; border-radius: 6px; font-size: 1rem;
-               font-weight: bold; cursor: pointer; margin-top: 0.5rem; }
-        .btn:hover { background: #283593; }
+        .btn { width: 100%; padding: 0.7rem; background: #37474f; color: white;
+               border: none; border-radius: 6px; font-size: 0.95rem;
+               font-weight: bold; cursor: pointer; margin-top: 0.3rem; }
+        .btn:hover { background: #263238; }
         .error { background: #ffebee; color: #c62828; padding: 0.75rem;
                  border-radius: 6px; margin-bottom: 1rem; font-size: 0.85rem; }
-        .hint { margin-top: 1rem; font-size: 0.78rem; color: #aaa; text-align: center; }
+        .hint { margin-top: 0.6rem; font-size: 0.75rem; color: #aaa; text-align: center; }
     </style>
 </head>
 <body>
 <div class="card">
     <h1>🎓 Smart Campus Events</h1>
-    <p class="subtitle">Sign in to register for events</p>
+    <p class="subtitle">Vel Tech University Event Portal</p>
 
-    <div class="student-note">
-        👋 <strong>Students:</strong> Use your Gmail to sign in and register for events
+    <!-- Student Section -->
+    <div class="student-box">
+        <h3>👨‍🎓 Students — Sign in with Google</h3>
+        <p>Use your Gmail account to login and register for events. Your email will be used to send confirmation.</p>
+        <a href="/oauth2/authorization/google" class="google-btn">
+            <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+                <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                <path fill="none" d="M0 0h48v48H0z"/>
+            </svg>
+            Sign in with Google
+        </a>
     </div>
 
-    <a href="/oauth2/authorization/google" class="google-btn">
-        <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
-            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-            <path fill="none" d="M0 0h48v48H0z"/>
-        </svg>
-        Sign in with Google
-    </a>
+    <div class="divider"><span>Admin access only below</span></div>
 
-    <div class="divider"><span>Admin login only below</span></div>
-
-    <div class="error" th:if="${param.error}">Invalid username or password.</div>
-    <div th:if="${param.logout}"
-         style="background:#e8f5e9;color:#2e7d32;padding:.75rem;border-radius:6px;margin-bottom:1rem;font-size:.85rem;">
-        Logged out successfully.
+    <!-- Admin Section -->
+    <div class="admin-box">
+        <h3>🔐 Admin Login</h3>
+        <div class="error" th:if="${param.error}">Invalid username or password.</div>
+        <div th:if="${param.logout}"
+             style="background:#e8f5e9;color:#2e7d32;padding:.6rem;border-radius:6px;margin-bottom:.8rem;font-size:.85rem;">
+            Logged out successfully.
+        </div>
+        <form th:action="@{/login}" method="post">
+            <div class="form-group">
+                <label>Username</label>
+                <input type="text" name="username" placeholder="admin"/>
+            </div>
+            <div class="form-group">
+                <label>Password</label>
+                <input type="password" name="password" placeholder="••••••••"/>
+            </div>
+            <button type="submit" class="btn">Admin Login</button>
+        </form>
+        <div class="hint">admin / admin123</div>
     </div>
-
-    <form th:action="@{/login}" method="post">
-        <div class="form-group">
-            <label for="username">Username</label>
-            <input type="text" id="username" name="username" placeholder="admin"/>
-        </div>
-        <div class="form-group">
-            <label for="password">Password</label>
-            <input type="password" id="password" name="password" placeholder="••••••••"/>
-        </div>
-        <button type="submit" class="btn">Admin Login</button>
-    </form>
-    <div class="hint">Admin: admin / admin123</div>
 </div>
 </body>
 </html>
