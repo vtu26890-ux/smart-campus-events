@@ -22,7 +22,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/events", "/events/**", "/register/**",
                                  "/my-registrations", "/api/**",
-                                 "/h2-console/**", "/css/**", "/js/**").permitAll()
+                                 "/css/**", "/js/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )
@@ -31,20 +31,15 @@ public class SecurityConfig {
                 .defaultSuccessUrl("/admin/dashboard", true)
                 .permitAll()
             )
-            .oauth2Login(oauth -> oauth
-                .loginPage("/login")
-                .defaultSuccessUrl("/oauth2/success", true)
-            )
             .logout(logout -> logout
+                .logoutUrl("/logout")
                 .logoutSuccessUrl("/")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
+                .deleteCookies("JSESSIONID")
                 .permitAll()
             )
-            .csrf(csrf -> csrf
-                .ignoringRequestMatchers("/h2-console/**")
-            )
-            .headers(headers -> headers
-                .frameOptions(frame -> frame.sameOrigin())
-            );
+            .csrf(csrf -> csrf.disable());
 
         return http.build();
     }
