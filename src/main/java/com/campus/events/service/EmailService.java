@@ -2,61 +2,67 @@ package com.campus.events.service;
 
 import com.campus.events.model.Event;
 import com.campus.events.model.Registration;
-import jakarta.mail.MessagingException;
-import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.format.DateTimeFormatter;
+import java.util.Map;
 
 @Service
 public class EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
 
-    @Autowired
-    private JavaMailSender mailSender;
-
-    @Value("${spring.mail.username:}")
-    private String fromEmail;
+    @Value("${resend.api.key:}")
+    private String resendApiKey;
 
     @Value("${app.name:Smart Campus Events}")
     private String appName;
 
-    // NOTE: @Async removed — running synchronously so errors appear in logs
     public void sendRegistrationConfirmation(Registration registration) {
-        log.info("=== EMAIL ATTEMPT START ===");
+        log.info("=== EMAIL ATTEMPT via Resend API ===");
         log.info("To: {}", registration.getEmail());
-        log.info("From: {}", fromEmail);
 
-        if (fromEmail == null || fromEmail.isBlank()) {
-            log.error("=== EMAIL SKIPPED: MAIL_USERNAME is empty ===");
+        if (resendApiKey == null || resendApiKey.isBlank()) {
+            log.error("=== RESEND_API_KEY not configured — skipping email ===");
             return;
         }
 
         try {
-            log.info("Creating MIME message...");
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            RestTemplate restTemplate = new RestTemplate();
 
-            helper.setFrom(fromEmail);
-            helper.setTo(registration.getEmail());
-            helper.setSubject("Registration Confirmed - " + registration.getEvent().getTitle());
-            helper.setText(buildHtml(registration), true);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setBearerAuth(resendApiKey);
 
-            log.info("Calling mailSender.send()...");
-            mailSender.send(message);
-            log.info("=== EMAIL SENT SUCCESSFULLY to {} ===", registration.getEmail());
+            Map<String, Object> body = Map.of(
+                "from", "Smart Campus Events <onboarding@resend.dev>",
+                "to", new String[]{ registration.getEmail() },
+                "subject", "Registration Confirmed - " + registration.getEvent().getTitle(),
+                "html", buildHtml(registration)
+            );
 
-        } catch (MessagingException e) {
-            log.error("=== EMAIL FAILED - MessagingException: {} ===", e.getMessage(), e);
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(body, headers);
+
+            ResponseEntity<String> response = restTemplate.postForEntity(
+                "https://api.resend.com/emails",
+                request,
+                String.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                log.info("=== EMAIL SENT SUCCESSFULLY to {} ===", registration.getEmail());
+            } else {
+                log.error("=== EMAIL FAILED - Status: {} Body: {} ===",
+                    response.getStatusCode(), response.getBody());
+            }
+
         } catch (Exception e) {
-            log.error("=== EMAIL FAILED - Exception: {} ===", e.getMessage(), e);
+            log.error("=== EMAIL FAILED - {}: {} ===", e.getClass().getSimpleName(), e.getMessage());
         }
     }
 
