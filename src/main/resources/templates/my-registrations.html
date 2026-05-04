@@ -131,8 +131,11 @@
                 <td><span class="badge" th:text="${reg.event.eventType}"></span></td>
                 <td th:text="${#temporals.format(reg.registeredAt, 'dd MMM yyyy')}"></td>
                 <td>
+                    <!-- FIX: use data-* attributes instead of th:onclick with string expressions.
+                         Thymeleaf blocks string values in event handler attributes (XSS prevention). -->
                     <button class="cancel-btn"
-                            th:onclick="|showDialog(${reg.id}, '${reg.event.title}')|">
+                            th:data-id="${reg.id}"
+                            th:data-title="${reg.event.title}">
                         🗑️ Cancel
                     </button>
                 </td>
@@ -175,6 +178,13 @@
     // Close dialog if clicking outside
     document.getElementById('confirmDialog').addEventListener('click', function(e) {
         if (e.target === this) closeDialog();
+    });
+
+    // FIX: attach click handler to all cancel buttons via data-* attributes
+    document.querySelectorAll('.cancel-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            showDialog(this.dataset.id, this.dataset.title);
+        });
     });
 </script>
 
