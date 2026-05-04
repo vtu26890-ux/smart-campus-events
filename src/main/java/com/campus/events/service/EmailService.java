@@ -12,23 +12,18 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.nio.charset.StandardCharsets;
 import java.time.format.DateTimeFormatter;
-import java.util.Base64;
 
 @Service
 public class EmailService {
 
     private static final Logger log = LoggerFactory.getLogger(EmailService.class);
-    private static final String MAILJET_API = "https://api.mailjet.com/v3.1/send";
+    private static final String RESEND_API = "https://api.resend.com/emails";
 
-    @Value("${mailjet.api.key:}")
+    @Value("${resend.api.key:}")
     private String apiKey;
 
-    @Value("${mailjet.secret.key:}")
-    private String secretKey;
-
-    @Value("${mailjet.from.email:}")
+    @Value("${resend.from.email:}")
     private String fromEmail;
 
     @Value("${app.name:Smart Campus Events}")
@@ -37,11 +32,11 @@ public class EmailService {
     @Async
     public void sendRegistrationConfirmation(Registration registration) {
         if (apiKey == null || apiKey.isBlank()) {
-            log.warn("⚠️ MAILJET_API_KEY not set — skipping email");
+            log.warn("⚠️ RESEND_API_KEY not set");
             return;
         }
 
-        log.info("📧 Sending to: {}", registration.getEmail());
+        log.info("📧 Sending to: {} from: {}", registration.getEmail(), fromEmail);
 
         try {
             String html = buildHtml(registration);
@@ -49,28 +44,21 @@ public class EmailService {
 
             String jsonBody = """
                 {
-                  "Messages": [{
-                    "From": {"Email": "%s", "Name": "Smart Campus Events"},
-                    "To": [{"Email": "%s", "Name": "%s"}],
-                    "Subject": "%s",
-                    "HTMLPart": %s
-                  }]
+                  "from": "%s",
+                  "to": ["%s"],
+                  "subject": "%s",
+                  "html": %s
                 }
                 """.formatted(
                     fromEmail,
                     registration.getEmail(),
-                    registration.getStudentName(),
                     subject,
                     toJsonString(html)
             );
 
-            String credentials = Base64.getEncoder().encodeToString(
-                (apiKey + ":" + secretKey).getBytes(StandardCharsets.UTF_8)
-            );
-
             HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(MAILJET_API))
-                .header("Authorization", "Basic " + credentials)
+                .uri(URI.create(RESEND_API))
+                .header("Authorization", "Bearer " + apiKey)
                 .header("Content-Type", "application/json")
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                 .build();
@@ -78,12 +66,12 @@ public class EmailService {
             HttpResponse<String> response = HttpClient.newHttpClient()
                 .send(request, HttpResponse.BodyHandlers.ofString());
 
-            log.info("📧 Mailjet status: {} response: {}", response.statusCode(), response.body());
+            log.info("📧 Resend status: {} body: {}", response.statusCode(), response.body());
 
-            if (response.statusCode() == 200) {
+            if (response.statusCode() == 200 || response.statusCode() == 201) {
                 log.info("✅ Email sent to {}", registration.getEmail());
             } else {
-                log.error("❌ Mailjet error {}: {}", response.statusCode(), response.body());
+                log.error("❌ Resend error {}: {}", response.statusCode(), response.body());
             }
 
         } catch (Exception e) {
@@ -123,18 +111,16 @@ public class EmailService {
                                  padding:36px 40px;text-align:center;">
                         <div style="font-size:36px;margin-bottom:8px;">🎓</div>
                         <h1 style="color:#ffffff;margin:0;font-size:24px;font-weight:700;">
-                          Registration Confirmed!
-                        </h1>
+                          Registration Confirmed!</h1>
                         <p style="color:rgba(255,255,255,0.85);margin:8px 0 0;font-size:15px;">
-                          You're all set for the event
-                        </p>
+                          You're all set for the event</p>
                       </td>
                     </tr>
                     <tr>
                       <td style="padding:36px 40px;">
                         <p style="color:#374151;font-size:16px;margin:0 0 24px;">
                           Hi <strong>%s</strong>,<br/><br/>
-                          Your registration has been confirmed. Here are your event details:
+                          Your registration has been confirmed:
                         </p>
                         <table width="100%%" cellpadding="0" cellspacing="0"
                                style="background:#f0f7ff;border:1.5px solid #bfdbfe;
@@ -150,14 +136,14 @@ public class EmailService {
                         <table width="100%%" cellpadding="0" cellspacing="0"
                                style="border:1px solid #e5e7eb;border-radius:8px;margin-bottom:28px;">
                           <tr style="background:#f9fafb;">
-                            <td style="padding:10px 16px;color:#6b7280;font-size:13px;
-                                       font-weight:600;border-bottom:1px solid #e5e7eb;width:40%%;">Name</td>
+                            <td style="padding:10px 16px;color:#6b7280;font-size:13px;font-weight:600;
+                                       border-bottom:1px solid #e5e7eb;width:40%%;">Name</td>
                             <td style="padding:10px 16px;color:#111827;font-size:13px;
                                        border-bottom:1px solid #e5e7eb;">%s</td>
                           </tr>
                           <tr>
-                            <td style="padding:10px 16px;color:#6b7280;font-size:13px;
-                                       font-weight:600;border-bottom:1px solid #e5e7eb;">Roll Number</td>
+                            <td style="padding:10px 16px;color:#6b7280;font-size:13px;font-weight:600;
+                                       border-bottom:1px solid #e5e7eb;">Roll Number</td>
                             <td style="padding:10px 16px;color:#111827;font-size:13px;
                                        border-bottom:1px solid #e5e7eb;">%s</td>
                           </tr>
@@ -167,23 +153,15 @@ public class EmailService {
                             <td style="padding:10px 16px;color:#111827;font-size:13px;">%s</td>
                           </tr>
                         </table>
-                        <div style="background:#fef3c7;border:1px solid #fcd34d;
-                                    border-radius:8px;padding:16px 20px;margin-bottom:28px;">
-                          <p style="margin:0;color:#92400e;font-size:13px;">
-                            <strong>📌 Important:</strong> Please carry this email or your roll number on event day.
-                          </p>
-                        </div>
                         <p style="color:#374151;font-size:15px;margin:0;">
-                          See you there! 🎉<br/><strong>%s Team</strong>
-                        </p>
+                          See you there! 🎉<br/><strong>%s Team</strong></p>
                       </td>
                     </tr>
                     <tr>
                       <td style="background:#f9fafb;border-top:1px solid #e5e7eb;
                                  padding:20px 40px;text-align:center;">
                         <p style="color:#9ca3af;font-size:12px;margin:0;">
-                          Automated confirmation from %s. Do not reply.
-                        </p>
+                          Automated confirmation from %s.</p>
                       </td>
                     </tr>
                   </table>
