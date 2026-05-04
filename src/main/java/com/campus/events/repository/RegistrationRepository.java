@@ -13,6 +13,11 @@ public interface RegistrationRepository extends JpaRepository<Registration, Long
 
     List<Registration> findByEventId(Long eventId);
 
+    // Fixed: JOIN FETCH ensures event data is loaded within the same session,
+    // preventing LazyInitializationException on /my-registrations
+    @Query("SELECT r FROM Registration r JOIN FETCH r.event WHERE r.email = :email")
+    List<Registration> findByEmailWithEvent(@Param("email") String email);
+
     List<Registration> findByEmail(String email);
 
     List<Registration> findByRollNumber(String rollNumber);

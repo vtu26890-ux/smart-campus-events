@@ -55,8 +55,10 @@ public class RegistrationService {
         registrationRepository.deleteById(registrationId);
     }
 
+    // Fixed: uses JOIN FETCH query to eagerly load event within the same Hibernate session,
+    // preventing LazyInitializationException when Thymeleaf accesses registration.event fields
     public List<Registration> getRegistrationsByEmail(String email) {
-        return registrationRepository.findByEmail(email);
+        return registrationRepository.findByEmailWithEvent(email);
     }
 
     public List<Registration> getRegistrationsByEvent(Long eventId) {
