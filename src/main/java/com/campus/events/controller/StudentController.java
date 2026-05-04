@@ -145,4 +145,23 @@ public class StudentController {
     public String loginPage() {
         return "login";
     }
+    @PostMapping("/my-registrations/cancel/{id}")
+    public String cancelRegistration(@PathVariable Long id,
+                                  HttpSession session,
+                                  RedirectAttributes redirectAttributes) {
+        String email = (String) session.getAttribute("oauth2Email");
+
+        if (email == null || email.isBlank()) {
+            return "redirect:/login";
+        }
+
+        try {
+            registrationService.cancelRegistration(id, email);
+            redirectAttributes.addFlashAttribute("success", "✅ Registration cancelled successfully.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "❌ " + e.getMessage());
+        }
+
+        return "redirect:/my-registrations";
+}
 }

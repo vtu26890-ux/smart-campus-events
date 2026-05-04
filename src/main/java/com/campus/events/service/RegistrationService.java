@@ -23,13 +23,11 @@ public class RegistrationService {
     private EmailService emailService;
 
     public Registration register(Registration registration) {
-        // Check duplicate
         if (registrationRepository.existsByEmailAndEventId(
                 registration.getEmail(), registration.getEvent().getId())) {
             throw new IllegalStateException("You are already registered for this event.");
         }
 
-        // Check capacity
         Event event = registration.getEvent();
         if (!eventService.hasSeatsAvailable(event)) {
             throw new IllegalStateException("Event is fully booked.");
@@ -38,11 +36,23 @@ public class RegistrationService {
         registration.setRegisteredAt(LocalDateTime.now());
         Registration saved = registrationRepository.save(registration);
         eventService.incrementRegistrationCount(event.getId());
-
-        // Send confirmation email asynchronously (non-blocking)
         emailService.sendRegistrationConfirmation(saved);
-
         return saved;
+    }
+
+    public void cancelRegistration(Long registrationId, String email) {
+        Registration reg = registrationRepository.findById(registrationId)
+            .orElseThrow(() -> new RuntimeException("Registration not found"));
+
+        // Security check — only the owner can cancel
+        if (!reg.getEmail().equalsIgnoreCase(email)) {
+            throw new RuntimeException("Unauthorized: You can only cancel your own registrations");
+        }
+
+        // Decrease event registration count
+        eventService.decrementRegistrationCount(reg.getEvent().getId());
+
+        registrationRepository.deleteById(registrationId);
     }
 
     public List<Registration> getRegistrationsByEmail(String email) {

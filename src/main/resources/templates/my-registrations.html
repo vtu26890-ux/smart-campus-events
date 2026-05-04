@@ -1,47 +1,115 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>My Registrations</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Segoe UI', sans-serif; background: #f0f4f8; color: #333; }
-        nav { background: #1a237e; color: white; padding: 1rem 2rem; display: flex; justify-content: space-between; }
-        nav a { color: white; text-decoration: none; margin-left: 1rem; }
-        .container { max-width: 900px; margin: 2rem auto; padding: 0 1rem; }
+        nav { background: #1a237e; color: white; padding: 1rem 2rem;
+              display: flex; justify-content: space-between; align-items: center; }
+        nav a { color: white; text-decoration: none; margin-left: 1rem; font-size: 0.9rem; }
+        .nav-right { display: flex; align-items: center; gap: 0.5rem; }
+        .user-info { color: #90caf9; font-size: 0.85rem; }
+        .logout-btn { background: #ef5350; color: white; border: none;
+                      padding: 0.4rem 0.9rem; border-radius: 4px;
+                      cursor: pointer; font-size: 0.85rem; font-weight: bold; }
+        .logout-btn:hover { background: #c62828; }
+        .container { max-width: 1000px; margin: 2rem auto; padding: 0 1rem; }
         h1 { color: #1a237e; margin-bottom: 1.5rem; }
+        .alert-success { background: #e8f5e9; border: 1px solid #a5d6a7;
+                         padding: 0.75rem 1rem; border-radius: 4px;
+                         margin-bottom: 1rem; color: #2e7d32; }
+        .alert-error { background: #ffebee; border: 1px solid #ef9a9a;
+                       padding: 0.75rem 1rem; border-radius: 4px;
+                       margin-bottom: 1rem; color: #c62828; }
         .search-box { display: flex; gap: 1rem; margin-bottom: 2rem; }
-        .search-box input { flex: 1; padding: 0.6rem 1rem; border: 1px solid #ccc; border-radius: 4px; font-size: 1rem; }
-        .btn { padding: 0.6rem 1.2rem; background: #1a237e; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
-        table { width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.1); }
+        .search-box input { flex: 1; padding: 0.6rem 1rem; border: 1px solid #ccc;
+                            border-radius: 4px; font-size: 1rem; }
+        .btn { padding: 0.6rem 1.2rem; background: #1a237e; color: white;
+               border: none; border-radius: 4px; cursor: pointer; font-size: 1rem; }
+        table { width: 100%; border-collapse: collapse; background: white;
+                border-radius: 8px; overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0,0,0,.1); }
         th { background: #1a237e; color: white; padding: 0.75rem 1rem; text-align: left; }
-        td { padding: 0.75rem 1rem; border-bottom: 1px solid #e0e0e0; }
+        td { padding: 0.75rem 1rem; border-bottom: 1px solid #e0e0e0; vertical-align: middle; }
         tr:last-child td { border-bottom: none; }
         tr:hover td { background: #f5f5f5; }
-        .badge { padding: 0.2rem 0.6rem; border-radius: 20px; font-size: 0.75rem; background: #e3f2fd; color: #1565c0; }
+        .badge { padding: 0.2rem 0.6rem; border-radius: 20px;
+                 font-size: 0.75rem; background: #e3f2fd; color: #1565c0; }
+        .cancel-btn { background: #ef5350; color: white; border: none;
+                      padding: 0.35rem 0.8rem; border-radius: 4px;
+                      cursor: pointer; font-size: 0.8rem; font-weight: bold; }
+        .cancel-btn:hover { background: #c62828; }
+        .confirm-dialog { display: none; position: fixed; top: 0; left: 0;
+                          width: 100%; height: 100%; background: rgba(0,0,0,0.5);
+                          z-index: 1000; align-items: center; justify-content: center; }
+        .confirm-dialog.show { display: flex; }
+        .dialog-box { background: white; border-radius: 12px; padding: 2rem;
+                      max-width: 400px; width: 90%; text-align: center;
+                      box-shadow: 0 8px 32px rgba(0,0,0,0.3); }
+        .dialog-box h3 { color: #1a237e; margin-bottom: 0.5rem; }
+        .dialog-box p { color: #666; margin-bottom: 1.5rem; font-size: 0.9rem; }
+        .dialog-actions { display: flex; gap: 1rem; justify-content: center; }
+        .btn-cancel-no { padding: 0.6rem 1.5rem; background: #e0e0e0; color: #333;
+                         border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-cancel-yes { padding: 0.6rem 1.5rem; background: #ef5350; color: white;
+                          border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-cancel-yes:hover { background: #c62828; }
+        .empty-state { text-align: center; padding: 3rem; color: #666; }
+        .empty-state div { font-size: 3rem; margin-bottom: 1rem; }
     </style>
 </head>
 <body>
+
+<!-- Confirmation Dialog -->
+<div class="confirm-dialog" id="confirmDialog">
+    <div class="dialog-box">
+        <div style="font-size:2.5rem;margin-bottom:0.5rem;">⚠️</div>
+        <h3>Cancel Registration?</h3>
+        <p id="dialogText">Are you sure you want to cancel this registration? This cannot be undone.</p>
+        <div class="dialog-actions">
+            <button class="btn-cancel-no" onclick="closeDialog()">No, Keep It</button>
+            <button class="btn-cancel-yes" id="confirmBtn">Yes, Cancel It</button>
+        </div>
+    </div>
+</div>
+
 <nav>
-    <a th:href="@{/}" style="color:white;text-decoration:none;font-weight:bold">🎓 CampusEvents</a>
-    <div>
+    <a th:href="@{/}" style="color:white;text-decoration:none;font-weight:bold;">🎓 CampusEvents</a>
+    <div class="nav-right">
         <a th:href="@{/events}">Browse Events</a>
         <a th:href="@{/my-registrations}">My Registrations</a>
+        <a sec:authorize="hasRole('ADMIN')" th:href="@{/admin/dashboard}">Admin</a>
+        <span sec:authorize="isAuthenticated()">
+            <span class="user-info" sec:authentication="name"></span>
+            <form th:action="@{/logout}" method="post" style="display:inline;">
+                <button type="submit" class="logout-btn">Logout</button>
+            </form>
+        </span>
     </div>
 </nav>
 
 <div class="container">
-    <h1>My Registrations</h1>
+    <h1>📋 My Registrations</h1>
+
+    <div th:if="${success}" class="alert-success" th:text="${success}"></div>
+    <div th:if="${error}" class="alert-error" th:text="${error}"></div>
 
     <form th:action="@{/my-registrations}" method="get" class="search-box">
-        <input type="email" name="email" th:value="${email}" placeholder="Enter your registered email..." required/>
+        <input type="email" name="email" th:value="${email}"
+               placeholder="Enter your registered email..." required/>
         <button type="submit" class="btn">🔍 Search</button>
     </form>
 
     <div th:if="${registrations != null}">
-        <div th:if="${#lists.isEmpty(registrations)}" style="color:#666;">
+
+        <div th:if="${#lists.isEmpty(registrations)}" class="empty-state">
+            <div>📭</div>
             No registrations found for <strong th:text="${email}"></strong>.
         </div>
+
         <table th:if="${!#lists.isEmpty(registrations)}">
             <thead>
             <tr>
@@ -51,20 +119,64 @@
                 <th>Venue</th>
                 <th>Type</th>
                 <th>Registered On</th>
+                <th>Action</th>
             </tr>
             </thead>
             <tbody>
             <tr th:each="reg, stat : ${registrations}">
                 <td th:text="${stat.count}"></td>
-                <td th:text="${reg.event.title}">Title</td>
-                <td th:text="${reg.event.eventDate}">Date</td>
-                <td th:text="${reg.event.venue}">Venue</td>
-                <td><span class="badge" th:text="${reg.event.eventType}">Type</span></td>
-                <td th:text="${#temporals.format(reg.registeredAt, 'dd MMM yyyy')}">Date</td>
+                <td><strong th:text="${reg.event.title}"></strong></td>
+                <td th:text="${reg.event.eventDate}"></td>
+                <td th:text="${reg.event.venue}"></td>
+                <td><span class="badge" th:text="${reg.event.eventType}"></span></td>
+                <td th:text="${#temporals.format(reg.registeredAt, 'dd MMM yyyy')}"></td>
+                <td>
+                    <button class="cancel-btn"
+                            th:onclick="|showDialog(${reg.id}, '${reg.event.title}')|">
+                        🗑️ Cancel
+                    </button>
+                </td>
             </tr>
             </tbody>
         </table>
     </div>
 </div>
+
+<!-- Hidden cancel forms (one per registration) -->
+<div th:if="${registrations != null}">
+    <form th:each="reg : ${registrations}"
+          th:id="|cancelForm-${reg.id}|"
+          th:action="@{/my-registrations/cancel/{id}(id=${reg.id})}"
+          method="post" style="display:none;">
+    </form>
+</div>
+
+<script>
+    let currentId = null;
+
+    function showDialog(regId, eventTitle) {
+        currentId = regId;
+        document.getElementById('dialogText').textContent =
+            'Are you sure you want to cancel your registration for "' + eventTitle + '"? This cannot be undone.';
+        document.getElementById('confirmDialog').classList.add('show');
+    }
+
+    function closeDialog() {
+        currentId = null;
+        document.getElementById('confirmDialog').classList.remove('show');
+    }
+
+    document.getElementById('confirmBtn').addEventListener('click', function() {
+        if (currentId) {
+            document.getElementById('cancelForm-' + currentId).submit();
+        }
+    });
+
+    // Close dialog if clicking outside
+    document.getElementById('confirmDialog').addEventListener('click', function(e) {
+        if (e.target === this) closeDialog();
+    });
+</script>
+
 </body>
 </html>

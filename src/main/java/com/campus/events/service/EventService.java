@@ -57,4 +57,13 @@ public class EventService {
             eventRepository.save(event);
         });
     }
+    public void decrementRegistrationCount(Long eventId) {
+        eventRepository.findById(eventId).ifPresent(event -> {
+            int current = event.getRegisteredCount();
+            if (current > 0) {
+                event.setRegisteredCount(current - 1);
+                eventRepository.save(event);
+            }
+        });
+    }
 }
